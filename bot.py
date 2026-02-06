@@ -1,8 +1,6 @@
 import os
-import logging
 import discord
 
-from pathlib import Path
 from dotenv import load_dotenv
 from discord.ext import commands
 from discord import app_commands
