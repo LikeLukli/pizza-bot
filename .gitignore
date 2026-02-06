@@ -7,5 +7,6 @@ venv/
 # Secrets
 .env
 
-# Data
+# Data and logs
 data/*.json
+data/logs/*
