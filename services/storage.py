@@ -18,6 +18,7 @@ def load_orders(data_file: Path = DEFAULT_DATA_FILE) -> list[Order]:
     with open(data_file, "r") as f:
         raw = json.load(f)
 
+    BOT_LOGGER.info(f"Loaded {len(raw)} orders.")
     for order in raw:
         order = Order(
             id=order["id"],
