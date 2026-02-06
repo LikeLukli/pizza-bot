@@ -1,16 +1,21 @@
 import json
+import logging
 
 from pathlib import Path
 from models.order import Order, Item
 
-DATA_FILE = Path("services/data.json")
+DEFAULT_DATA_FILE = Path("services/data.json")
+BOT_LOGGER = logging.getLogger(__name__)
 
-def load_orders() -> list[Order]:
-    if not DATA_FILE.exists():
+def load_orders(data_file: Path = DEFAULT_DATA_FILE) -> list[Order]:
+    BOT_LOGGER.info("Loading orders...")
+    if not data_file.exists():
+        BOT_LOGGER.info("Data file not found. Returning empty array...")
         return []
 
     orders = []
-    with open(DATA_FILE, "r") as f:
+    BOT_LOGGER.info(f"Data file found. Loading orders from {data_file}...")
+    with open(data_file, "r") as f:
         raw = json.load(f)
 
     for order in raw:
@@ -24,10 +29,10 @@ def load_orders() -> list[Order]:
 
     return orders
 
-def save_orders(order: list[Order]):
-    DATA_FILE.parent.mkdir(exist_ok=True)
+def save_orders(order: list[Order], data_file: Path = DEFAULT_DATA_FILE):
+    data_file.parent.mkdir(exist_ok=True)
 
-    with open(DATA_FILE, "w") as f:
+    with open(data_file, "w") as f:
         json.dump([
             {
                 "id": o.id,
@@ -39,4 +44,4 @@ def save_orders(order: list[Order]):
 
             }
             for o in order
-        ])
+        ], f, indent=4)
