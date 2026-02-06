@@ -4,10 +4,9 @@ import logging
 from pathlib import Path
 from models.order import Order, Item
 
-DEFAULT_DATA_FILE = Path("services/data.json")
 BOT_LOGGER = logging.getLogger(__name__)
 
-def load_orders(data_file: Path = DEFAULT_DATA_FILE) -> list[Order]:
+def load_orders(data_file: Path ) -> list[Order]:
     BOT_LOGGER.info("Loading orders...")
     if not data_file.exists():
         BOT_LOGGER.info("Data file not found. Returning empty array...")
@@ -30,7 +29,7 @@ def load_orders(data_file: Path = DEFAULT_DATA_FILE) -> list[Order]:
 
     return orders
 
-def save_orders(order: list[Order], data_file: Path = DEFAULT_DATA_FILE):
+def save_orders(order: list[Order], data_file: Path) -> None:
     data_file.parent.mkdir(exist_ok=True)
 
     with open(data_file, "w") as f:
