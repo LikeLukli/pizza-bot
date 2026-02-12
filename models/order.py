@@ -16,14 +16,20 @@ class Item:
 @dataclass
 class Order:
     id: str
-    user_id: int
+    user: User
     items: List[Item] = field(default_factory=list)
     status: OrderStatus = OrderStatus.OPEN
     date: date = date.today()
 
     @staticmethod
-    def create(user_id: int):
+    def create(user_id: int, user: User):
         return Order(
             id=str(uuid.uuid4()),
-            user_id=user_id
+            user=user
         )
+
+@dataclass
+class User:
+    user_id: int
+    username: str
+    avatar_url: str
