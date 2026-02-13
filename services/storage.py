@@ -1,47 +1,94 @@
-import json
-import logging
-
-from pathlib import Path
+import sqlite3
 from models.order import Order, Item
 
-BOT_LOGGER = logging.getLogger(__name__)
+_connection = None
 
-def load_orders(data_file: Path ) -> list[Order]:
-    BOT_LOGGER.info("Loading orders...")
-    if not data_file.exists():
-        BOT_LOGGER.info("Data file not found. Returning empty array...")
-        return []
+def get_connection(filename="./data/db/orders.db"):
+    global _connection
+    if _connection is None:
+        _connection = sqlite3.connect(filename)
+        _connection.row_factory = sqlite3.Row
 
-    orders = []
-    BOT_LOGGER.info(f"Data file found. Loading orders from {data_file}...")
-    with open(data_file, "r") as f:
-        raw = json.load(f)
+    return _connection
 
-    BOT_LOGGER.info(f"Loaded {len(raw)} orders.")
-    for order in raw:
-        order = Order(
-            id=order["id"],
-            user_id=order["user_id"],
-            items=[Item(**item) for item in order["items"]],
-            status=order["status"]
-        )
-        orders.append(order)
 
-    return orders
+def init_db():
+    connection = get_connection()
+    cursor = connection.cursor()
 
-def save_orders(order: list[Order], data_file: Path) -> None:
-    data_file.parent.mkdir(exist_ok=True)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        avatar_url TEXT NOT NULL
+    )
+    """)
 
-    with open(data_file, "w") as f:
-        json.dump([
-            {
-                "id": o.id,
-                "user_id": o.user_id,
-                "items": [
-                    {"name": i.name, "quantity": i.quantity}
-                    for i in o.items
-                ]
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS items (
+        item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        price REAL NOT NULL,
+    )
+    """)
 
-            }
-            for o in order
-        ], f, indent=4)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        date DATETIME NOT NULL,
+        status TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS order_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER NOT NULL,
+        item_id INTEGER NOT NULL,
+        extra_wishes TEXT,
+        quantity INTEGER NOT NULL,
+        FOREIGN KEY (order_id) REFERENCES orders(id),
+        FOREIGN KEY (item_id) REFERENCES items(item_id))
+    """)
+
+    connection.commit()
+
+def close_db():
+    connection = get_connection()
+    connection.close()
+
+def get_open_orders() -> list:
+    connection = get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM orders WHERE status='open'")
+    return cursor.fetchall()
+
+#TODO
+def get_or_create_user(user_id: int, username: str, avatar_url: str) -> dict:
+    pass
+
+def get_user_open_order(user_id: int) -> dict | None:
+    pass
+
+def create_order(user_id: int) -> int:
+    pass
+
+def add_item_to_order(order_id: int, item_id: int, quantity: int, extra_wishes: str) -> bool:
+    pass
+
+def get_or_create_item(name: str, price: float) -> int:
+    pass
+
+def get_order_with_items(order_id: int) -> dict | None:
+    pass
+
+def close_order(order_id: int) -> bool:
+    pass
+
+def remove_item_from_order(order_id: int, item_id: int) -> bool:
+    pass
+
+def update_item_in_order(order_id: int, item_id: int, quantity: int, extra_wishes: str) -> bool:
+    pass
