@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord import app_commands
 
 from services.logger_conf import BotLogger
+from services.storage import init_db
 
 # configure intents
 intents = discord.Intents.default()
@@ -33,6 +34,7 @@ bot = PizzaBot()
 
 @bot.event
 async def on_ready():
+    init_db()
     bot_logger.info(f'We have logged in as {bot.user}.')
 
 async def main():

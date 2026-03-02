@@ -9,7 +9,8 @@ class OrderCog(commands.Cog):
 
     @app_commands.command(name="order", description="Bestelle etwas")
     async def order(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Deine Bestellung wurde aufgenommen!")
+
+        await interaction.response.send_message("Deine Bestellung wurde aufgenommen!", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(OrderCog(bot))
